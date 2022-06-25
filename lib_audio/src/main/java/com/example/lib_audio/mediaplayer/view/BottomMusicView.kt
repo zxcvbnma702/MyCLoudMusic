@@ -34,19 +34,32 @@ class BottomMusicView @JvmOverloads constructor(
 ) : RelativeLayout(
     mContext, attrs, defStyleAttr
 ) {
-    /*
-     * View
-     */
-    private var mLeftView: ImageView? = null
-    private var mTitleView: TextView? = null
-    private var mAlbumView: TextView? = null
-    private var mPlayView: ImageView? = null
-    private var mRightView: ImageView? = null
 
+    //左侧圆盘
+    private val mLeftView by lazy{
+        rootView.findViewById<ImageView>(R.id.album_view)
+    }
+    private val mTitleView by lazy{
+        rootView.findViewById<TextView>(R.id.audio_name_view)
+    }
+    private val mAlbumView by lazy{
+        rootView.findViewById<TextView>(R.id.audio_album_view)
+    }
+    private val mPlayView by lazy{
+        rootView.findViewById<ImageView>(R.id.play_view)
+    }
+    //歌单列表按键
+    private val mRightView by lazy{
+        rootView.findViewById<ImageView>(R.id.show_list_view)
+    }
+    private val animator by lazy{
+        ObjectAnimator.ofFloat(mLeftView, ROTATION.name, 0f, 360f)
+    }
     /*
      * data
      */
     private var mAudioBean: AudioBean? = null
+
     private fun initView() {
         val rootView = LayoutInflater.from(mContext).inflate(R.layout.bottom_view, this)
 
@@ -54,27 +67,19 @@ class BottomMusicView @JvmOverloads constructor(
 //            MusicPlayerActivity.start(mContext as Activity)
         }
 
-        // 左侧mLeftView 不停旋转
-        mLeftView = rootView.findViewById(R.id.album_view)
-
-        val animator = ObjectAnimator.ofFloat(mLeftView, ROTATION.name, 0f, 360f)
         animator.apply {
             duration = 10000
             interpolator = LinearInterpolator()
-            repeatCount = -1
+            repeatCount = ObjectAnimator.INFINITE
         }
         animator.start()
 
-        mTitleView = rootView.findViewById(R.id.audio_name_view)
-        mAlbumView = rootView.findViewById(R.id.audio_album_view)
-        mPlayView = rootView.findViewById(R.id.play_view)
-
-        (mPlayView as ImageView).setOnClickListener {
-
+        mPlayView.setOnClickListener {
+            AudioController.play()
         }
-        // 显示音乐列表
-        mRightView = rootView.findViewById(R.id.show_list_view)
-        (mRightView as ImageView).setOnClickListener{ //显示音乐列表对话框
+
+        //显示音乐列表对话框
+        mRightView.setOnClickListener{
 //            val dialog = MusicListDialog(mContext)
 //            dialog.show()
         }
@@ -105,12 +110,11 @@ class BottomMusicView @JvmOverloads constructor(
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
-    fun onAudioProgrssEvent(event: AudioProgressEvent?) {
+    fun onAudioProgressEvent(event: AudioProgressEvent?) {
         //更新当前view的播放进度
     }
 
     private fun showLoadView() {
-        //目前loading状态的UI处理与pause逻辑一样，分开为了以后好扩展
         if (mAudioBean != null) {
             ImageLoaderManager.getInstance().displayImageForCircle(mLeftView, mAudioBean!!.albumPic)
             mTitleView!!.text = mAudioBean!!.name
@@ -123,12 +127,16 @@ class BottomMusicView @JvmOverloads constructor(
         if (mAudioBean != null) {
             mPlayView!!.setImageResource(R.mipmap.note_btn_play_white)
         }
+        if (animator.isRunning){
+            animator.pause()
+        }
     }
 
     private fun showPlayView() {
         if (mAudioBean != null) {
             mPlayView!!.setImageResource(R.mipmap.note_btn_pause_white)
         }
+        if (animator.isPaused) animator.resume() else animator.start()
     }
 
     init {

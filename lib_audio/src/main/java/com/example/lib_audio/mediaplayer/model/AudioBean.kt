@@ -8,7 +8,7 @@ import io.objectbox.annotation.Entity
  * @feature:
  */
 
-data class AudioBean(
+data class AudioBean (
     val id: String,
     val url: String,
     val name: String,
@@ -18,6 +18,8 @@ data class AudioBean(
     val albumPic: String,
     val totalTime: String
 ){
+    constructor() : this("999", "1", "error", "error", "error", "error", "error", "error")
+
     override fun equals(other: Any?): Boolean {
         if (other == null) {
             return false

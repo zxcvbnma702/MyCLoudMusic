@@ -13,11 +13,11 @@ import androidx.annotation.RequiresApi
  * @feature: 音频焦点监听器
  */
 
-internal class AudioFocusManager(context: Context, listener: AudioFocusListener?): AudioManager.OnAudioFocusChangeListener {
+internal class AudioFocusManager(context: Context, listener: AudioFocusListener): AudioManager.OnAudioFocusChangeListener {
     private val TAG = AudioFocusManager::class.java.simpleName
 
-    private var mAudioFocusListener: AudioFocusListener? = null
-    private var audioManager: AudioManager? = null
+    private var mAudioFocusListener: AudioFocusListener
+    private var audioManager: AudioManager
 
     init {
         audioManager = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
@@ -26,14 +26,15 @@ internal class AudioFocusManager(context: Context, listener: AudioFocusListener?
 
     fun requestAudioFocus(): Boolean {
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            audioManager!!.requestAudioFocus(
+            audioManager.requestAudioFocus(
                 AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN)
                     .setAudioAttributes(
-                        AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_MEDIA).setContentType(AudioAttributes.CONTENT_TYPE_MUSIC).build())
+                        AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_MEDIA)
+                            .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC).build())
                     .setAcceptsDelayedFocusGain(true)
                     .build()) == AudioManager.AUDIOFOCUS_REQUEST_GRANTED
         } else {
-            audioManager!!.requestAudioFocus(
+            audioManager.requestAudioFocus(
             this, AudioManager.STREAM_MUSIC,
             AudioManager.AUDIOFOCUS_GAIN) == AudioManager.AUDIOFOCUS_REQUEST_GRANTED
         }
@@ -41,25 +42,25 @@ internal class AudioFocusManager(context: Context, listener: AudioFocusListener?
 
     fun abandonAudioFocus() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            audioManager!!.abandonAudioFocusRequest(
+            audioManager.abandonAudioFocusRequest(
                 AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN)
                     .setOnAudioFocusChangeListener(this)
                     .build())
         }else{
-            audioManager!!.abandonAudioFocus(this)
+            audioManager.abandonAudioFocus(this)
         }
     }
 
     override fun onAudioFocusChange(focusChange: Int) {
         when (focusChange) {
             // 重新获得焦点
-            AudioManager.AUDIOFOCUS_GAIN -> if (mAudioFocusListener != null) mAudioFocusListener!!.audioFocusGrant()
+            AudioManager.AUDIOFOCUS_GAIN -> mAudioFocusListener.audioFocusGrant()
             // 永久丢失焦点，如被其他播放器抢占
-            AudioManager.AUDIOFOCUS_LOSS -> if (mAudioFocusListener != null) mAudioFocusListener!!.audioFocusLoss()
+            AudioManager.AUDIOFOCUS_LOSS -> mAudioFocusListener.audioFocusLoss()
             // 短暂丢失焦点，如来电
-            AudioManager.AUDIOFOCUS_LOSS_TRANSIENT -> if (mAudioFocusListener != null) mAudioFocusListener!!.audioFocusLossTransient()
+            AudioManager.AUDIOFOCUS_LOSS_TRANSIENT -> mAudioFocusListener.audioFocusLossTransient()
             // 瞬间丢失焦点，如通知
-            AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK -> if (mAudioFocusListener != null) mAudioFocusListener!!.audioFocusLossDuck()
+            AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK -> mAudioFocusListener.audioFocusLossDuck()
         }
     }
 

@@ -15,15 +15,19 @@ import com.example.cloudmusic.view.home.fragment.MineFragment
 import com.example.cloudmusic.view.login.LoginActivity
 import com.example.cloudmusic.view.login.entity.LoginEvent
 import com.example.cloudmusic.view.login.manager.UserManager
+import com.example.lib_audio.mediaplayer.app.AudioHelper
+import com.example.lib_audio.mediaplayer.model.AudioBean
 import com.example.lib_image_loader.app.ImageLoaderManager
 import com.google.android.material.tabs.TabLayout
 import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
 import org.greenrobot.eventbus.ThreadMode
 
+
 class HomeActivity : FragmentActivity(), View.OnClickListener {
 
     private lateinit var binding: ActivityHomeBinding
+    private val mLists: ArrayList<AudioBean> = ArrayList()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -41,13 +45,44 @@ class HomeActivity : FragmentActivity(), View.OnClickListener {
     }
 
     private fun initData() {
-
+        mLists.add(
+            AudioBean(
+                "100001", "http://192.168.0.9:8081/父亲的散文诗.m4a",
+                "以你的名字喊我", "周杰伦", "七里香", "电影《不能说的秘密》主题曲,尤其以最美的不是下雨天,是与你一起躲过雨的屋檐最为经典",
+                "https://portrait.gitee.com/uploads/avatars/user/412/1236427_aqie_1578947067.png!avatar60",
+                "4:30"
+            )
+        )
+        mLists.add(
+            AudioBean(
+                "100002", "http://192.168.0.9:8081/云雨成烟.m4a", "云雨成烟",
+                "梁静茹", "勇气", "电影《不能说的秘密》主题曲,尤其以最美的不是下雨天,是与你一起躲过雨的屋檐最为经典",
+                "https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1559698193627&di=711751f16fefddbf4cbf71da7d8e6d66&imgtype=jpg&src=http%3A%2F%2Fimg0.imgtn.bdimg.com%2Fit%2Fu%3D213168965%2C1040740194%26fm%3D214%26gp%3D0.jpg",
+                "4:40"
+            )
+        )
+        mLists.add(
+            AudioBean(
+                "100003", "http://192.168.0.9:8081/walk on the water.m4a", "walk",
+                "汪峰", "春天里", "电影《不能说的秘密》主题曲,尤其以最美的不是下雨天,是与你一起躲过雨的屋檐最为经典",
+                "https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1559698239736&di=3433a1d95c589e31a36dd7b4c176d13a&imgtype=0&src=http%3A%2F%2Fpic.zdface.com%2Fupload%2F201051814737725.jpg",
+                "3:20"
+            )
+        )
+        mLists.add(
+            AudioBean(
+                "100004", "http://192.168.0.9:8081/wind.m4a", "风停了我们还拥抱",
+                "五月天", "小幸运", "电影《不能说的秘密》主题曲,尤其以最美的不是下雨天,是与你一起躲过雨的屋檐最为经典",
+                "https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1559698289780&di=5146d48002250bf38acfb4c9b4bb6e4e&imgtype=0&src=http%3A%2F%2Fpic.baike.soso.com%2Fp%2F20131220%2Fbki-20131220170401-1254350944.jpg",
+                "2:45"
+            )
+        )
+        AudioHelper.addAudio(mLists)
     }
 
     private fun initView() {
         initTab()
         initLogin()
-
     }
 
     private fun initLogin() {

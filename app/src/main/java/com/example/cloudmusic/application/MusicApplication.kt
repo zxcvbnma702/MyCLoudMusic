@@ -1,4 +1,4 @@
-package com.example.cloudmusic
+package com.example.cloudmusic.application
 
 import android.app.Application
 import com.example.lib_audio.mediaplayer.app.AudioHelper
@@ -8,9 +8,9 @@ import com.example.lib_audio.mediaplayer.app.AudioHelper
  * @date:2022-06-10 22:31
  * @feature:
  */
-class BaseApplication: Application() {
+class MusicApplication: Application() {
     override fun onCreate() {
         super.onCreate()
-        AudioHelper.instance.init(this)
+        AudioHelper.init(this)
     }
 }

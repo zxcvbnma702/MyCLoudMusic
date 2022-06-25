@@ -43,7 +43,7 @@
                 android:layout_marginEnd="42dp"
                 android:layout_toStartOf="@id/search_view"
                 android:layout_toEndOf="@id/toggle_view"
-                app:tabIndicatorHeight="0dp"/>
+                app:tabIndicatorHeight="0dp" />
 
         </RelativeLayout>
 
@@ -51,9 +51,20 @@
             android:id="@+id/view_pager"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_below="@+id/title_layout">
+            android:layout_below="@+id/title_layout"
+            android:layout_above="@+id/bottom_view_music"
+            >
 
         </androidx.viewpager.widget.ViewPager>
+
+        <com.example.lib_audio.mediaplayer.view.BottomMusicView
+            android:id="@+id/bottom_view_music"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentBottom="true">
+
+        </com.example.lib_audio.mediaplayer.view.BottomMusicView>
 
     </RelativeLayout>
 

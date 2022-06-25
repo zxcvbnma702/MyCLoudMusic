@@ -2,13 +2,11 @@ package com.example.lib_audio.mediaplayer.core
 
 import android.content.Context
 import android.media.AudioAttributes
-import android.media.AudioManager
 import android.media.MediaPlayer
+import android.media.MediaPlayer.SEEK_CLOSEST
 import android.net.wifi.WifiManager
-import android.os.Handler
-import android.os.Looper
-import android.os.Message
-import android.os.PowerManager
+import android.os.*
+import android.provider.MediaStore
 import android.util.Log
 import com.example.lib_audio.mediaplayer.app.AudioHelper
 import com.example.lib_audio.mediaplayer.event.*
@@ -21,7 +19,7 @@ import org.greenrobot.eventbus.EventBus
  * @feature:播放音频, 发送事件, 对各种事物的一层封装
  */
 
-class AudioPlayer: MediaPlayer.OnCompletionListener,
+internal class AudioPlayer() : MediaPlayer.OnCompletionListener,
     MediaPlayer.OnBufferingUpdateListener, MediaPlayer.OnPreparedListener, MediaPlayer.OnErrorListener, AudioFocusManager.AudioFocusListener{
 
     private var isPauseByFocusLossTransient: Boolean = false
@@ -29,10 +27,10 @@ class AudioPlayer: MediaPlayer.OnCompletionListener,
     private val TIME_MSG = 0x01
     private val TIME_INVAL = 100
 
-    private var cmp: CustomMediaPlayer? = CustomMediaPlayer()
-    private var mWifiLock: WifiManager.WifiLock?
+    private var cmp: CustomMediaPlayer = CustomMediaPlayer()
+    private var mWifiLock: WifiManager.WifiLock
+    private var mAudioFocusManager: AudioFocusManager
 
-    private var mAudioFocusManager: AudioFocusManager?
     private val mHandler: Handler = object : Handler(Looper.getMainLooper()) {
         override fun handleMessage(msg: Message) {
             when (msg.what) {
@@ -41,7 +39,7 @@ class AudioPlayer: MediaPlayer.OnCompletionListener,
                         //UI类型处理事件
                         EventBus.getDefault().post(
                                 AudioProgressEvent(
-                                    getStatus()!!,
+                                    getStatus(),
                                     getCurrentPosition(),
                                     getDuration()
                                 )
@@ -51,46 +49,38 @@ class AudioPlayer: MediaPlayer.OnCompletionListener,
             }
         }
     }
+
     init {
         val attr = AudioAttributes.Builder()
                     .setUsage(AudioAttributes.USAGE_MEDIA)
                     .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
                     .build()
-
-        cmp!!.apply {
-            setWakeMode(null, PowerManager.PARTIAL_WAKE_LOCK)
-            setAudioStreamType(AudioManager.STREAM_MUSIC)
+        cmp.apply {
+            setWakeMode(AudioHelper.context, PowerManager.PARTIAL_WAKE_LOCK)
             setAudioAttributes(attr)
             setOnCompletionListener(this)
             setOnPreparedListener(this@AudioPlayer)
             setOnBufferingUpdateListener(this@AudioPlayer)
             setOnErrorListener(this@AudioPlayer)
         }
-        mWifiLock = ((AudioHelper.instance.getContext()!!.applicationContext.getSystemService(Context.WIFI_SERVICE)) as WifiManager)
-            .createWifiLock(WifiManager.WIFI_MODE_FULL_HIGH_PERF, "Wifi")
-
-        mAudioFocusManager = AudioFocusManager(AudioHelper.instance.getContext()!!, this)
+        mWifiLock = ((AudioHelper.context.applicationContext.getSystemService(Context.WIFI_SERVICE)) as WifiManager)
+            .createWifiLock(WifiManager.WIFI_MODE_FULL_HIGH_PERF, TAG)
+        mAudioFocusManager = AudioFocusManager(AudioHelper.context, this)
     }
 
     /**
      * 获取播放器状态
      */
-    fun getStatus(): CustomMediaPlayer.Status? {
-        return if (cmp != null) {
-            cmp!!.getState()
-        } else {
-            CustomMediaPlayer.Status.STOPPED
-        }
-    }
+    fun getStatus(): CustomMediaPlayer.Status  = cmp.getState()
 
     /**
-     * 获取当前音乐总时长,更新进度用
+     * 获取当前音乐总时长
      */
     fun getDuration(): Int {
         return if (getStatus() === CustomMediaPlayer.Status.STARTED
             || getStatus() === CustomMediaPlayer.Status.PAUSED
         ) {
-            cmp!!.duration
+            cmp.duration
         } else 0
     }
 
@@ -101,8 +91,17 @@ class AudioPlayer: MediaPlayer.OnCompletionListener,
         return if (getStatus() === CustomMediaPlayer.Status.STARTED
             || getStatus() === CustomMediaPlayer.Status.PAUSED
         ) {
-            cmp!!.currentPosition
+            cmp.currentPosition
         } else 0
+    }
+
+    /**
+     * 跳转到指定时间
+     */
+    fun seekTo(time : Long){
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
+            cmp.seekTo(time, SEEK_CLOSEST)
+        }
     }
 
     /**
@@ -110,12 +109,12 @@ class AudioPlayer: MediaPlayer.OnCompletionListener,
    */
     private fun start() {
         // 获取音频焦点,保证播放器顺利播放
-        if (!mAudioFocusManager!!.requestAudioFocus()) {
+        if (!mAudioFocusManager.requestAudioFocus()) {
             Log.e(TAG, "获取音频焦点失败")
         }
-        cmp!!.start()
+        cmp.start()
         // 启用wifi锁
-        mWifiLock!!.acquire()
+        mWifiLock.acquire()
         //更新进度
         mHandler.sendEmptyMessage(TIME_MSG)
         //发送start事件，UI类型处理事件
@@ -127,7 +126,7 @@ class AudioPlayer: MediaPlayer.OnCompletionListener,
      */
     fun load(audioBean: AudioBean){
         try {
-            cmp!!.apply {
+            cmp.apply {
                 reset()
                 setDataSource(audioBean.url)
                 prepareAsync()
@@ -152,13 +151,11 @@ class AudioPlayer: MediaPlayer.OnCompletionListener,
      */
     fun pause() {
         if(getStatus() == CustomMediaPlayer.Status.STARTED){
-            cmp!!.pause()
-
-            if(mWifiLock!!.isHeld){
-                mWifiLock!!.release()
+            cmp.pause()
+            if(mWifiLock.isHeld){
+                mWifiLock.release()
             }
-
-            mAudioFocusManager?.abandonAudioFocus()
+            mAudioFocusManager.abandonAudioFocus()
             EventBus.getDefault().post(AudioPauseEvent())
         }
     }
@@ -167,21 +164,13 @@ class AudioPlayer: MediaPlayer.OnCompletionListener,
      * 释放全部资源
      */
     fun release(){
-        if (cmp == null) {
-            return
-        }
-        cmp!!.release()
-        cmp = null
+        cmp.release()
         // 取消音频焦点
-        if (mAudioFocusManager != null) {
-            mAudioFocusManager!!.abandonAudioFocus()
-        }
+        mAudioFocusManager.abandonAudioFocus()
         // 关闭wifi锁
-        if (mWifiLock!!.isHeld) {
-            mWifiLock!!.release()
+        if (mWifiLock.isHeld) {
+            mWifiLock.release()
         }
-        mWifiLock = null
-        mAudioFocusManager = null
         mHandler.removeCallbacksAndMessages(null)
         //发送销毁播放器事件,清除通知等
         EventBus.getDefault().post(AudioReleaseEvent())
@@ -190,28 +179,7 @@ class AudioPlayer: MediaPlayer.OnCompletionListener,
     /**
      * 设置音量
      */
-    private fun setVolumn(fl: Float, fr: Float) {
-        if(cmp != null){
-            cmp!!.setVolume(fl, fr)
-        }
-    }
-
-    override fun onCompletion(mp: MediaPlayer?) {
-        EventBus.getDefault().post(AudioCompleteEvent())
-    }
-
-    override fun onBufferingUpdate(mp: MediaPlayer?, percent: Int) {
-
-    }
-
-    override fun onPrepared(mp: MediaPlayer?) {
-        start()
-    }
-
-    override fun onError(mp: MediaPlayer?, what: Int, extra: Int): Boolean {
-        EventBus.getDefault().post(AudioErrorEvent(AudioErrorEvent.Error.error))
-        return true
-    }
+    private fun setVolumn(fl: Float, fr: Float) = cmp.setVolume(fl, fr)
 
     /**
      * 请求焦点成功
@@ -229,6 +197,7 @@ class AudioPlayer: MediaPlayer.OnCompletionListener,
      */
     override fun audioFocusLoss() {
         pause()
+        isPauseByFocusLossTransient = true
     }
 
     /**
@@ -244,6 +213,23 @@ class AudioPlayer: MediaPlayer.OnCompletionListener,
      */
     override fun audioFocusLossDuck() {
         setVolumn(0.5f, 0.5f)
+    }
+
+    override fun onCompletion(mp: MediaPlayer?) {
+        EventBus.getDefault().post(AudioCompleteEvent())
+    }
+
+    override fun onBufferingUpdate(mp: MediaPlayer?, percent: Int) {
+
+    }
+
+    override fun onPrepared(mp: MediaPlayer?) {
+        start()
+    }
+
+    override fun onError(mp: MediaPlayer?, what: Int, extra: Int): Boolean {
+        EventBus.getDefault().post(AudioErrorEvent(AudioErrorEvent.Error.error))
+        return true
     }
 
 }

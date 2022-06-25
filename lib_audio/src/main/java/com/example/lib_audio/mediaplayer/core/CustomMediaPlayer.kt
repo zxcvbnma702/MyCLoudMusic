@@ -12,10 +12,10 @@ import java.io.IOException
 class CustomMediaPlayer() : MediaPlayer(), MediaPlayer.OnCompletionListener{
 
     enum class Status {
-        IDLE, INITIALIZED, STARTED, PAUSED, STOPPED, COMPLETED
+        IDLE, INITIALIZED, STARTED, PAUSED, STOPPED, COMPLETED, NUL
     }
 
-    private var mState: Status? = null
+    private var mState: Status = Status.NUL
 
     private var mOnCompletionListener: OnCompletionListener? = null
 
@@ -69,11 +69,11 @@ class CustomMediaPlayer() : MediaPlayer(), MediaPlayer.OnCompletionListener{
         mState = Status.PAUSED
     }
 
-    fun setState(mState: Status?) {
+    fun setState(mState: Status) {
         this.mState = mState
     }
 
-    fun getState(): Status? {
+    fun getState(): Status {
         return mState
     }
 
