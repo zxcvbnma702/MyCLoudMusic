@@ -8,53 +8,40 @@ import java.io.IOException
  * @date:2022-06-10 22:50
  * @feature:状态机
  */
-
-class CustomMediaPlayer() : MediaPlayer(), MediaPlayer.OnCompletionListener{
+class CustomMediaPlayer internal constructor() : MediaPlayer(), MediaPlayer.OnCompletionListener {
+    private var mState = Status.IDLE
+    private lateinit var mListener: OnCompletionListener
 
     enum class Status {
-        IDLE, INITIALIZED, STARTED, PAUSED, STOPPED, COMPLETED, NUL
+        IDLE, INITIALIZED, STARTED, PAUSED, STOPPED, COMPLETED, PREPARED
     }
 
-    private var mState: Status = Status.NUL
-
-    private var mOnCompletionListener: OnCompletionListener? = null
-
-    init {
-        mState = Status.IDLE
-        super.setOnCompletionListener(this)
-    }
-
-    override fun reset() {
-        super.reset()
-        mState = Status.IDLE
+    override fun onCompletion(mp: MediaPlayer?) {
+        mState = Status.COMPLETED
+            mListener.onCompletion(mp)
     }
 
     @Throws(
         IOException::class,
         IllegalArgumentException::class,
-        SecurityException::class,
-        IllegalStateException::class
+        IllegalStateException::class,
+        SecurityException::class
     )
-
     override fun setDataSource(path: String?) {
         super.setDataSource(path)
         mState = Status.INITIALIZED
     }
 
+    @Throws(IllegalStateException::class)
     override fun start() {
         super.start()
         mState = Status.STARTED
     }
 
-    override fun setOnCompletionListener(listener: OnCompletionListener?) {
-        mOnCompletionListener = listener
-    }
-
-    override fun onCompletion(mp: MediaPlayer?) {
-        mState = Status.COMPLETED
-        if (mOnCompletionListener != null) {
-            mOnCompletionListener!!.onCompletion(mp)
-        }
+    @Throws(IllegalStateException::class)
+    override fun pause() {
+        super.pause()
+        mState = Status.PAUSED
     }
 
     @Throws(IllegalStateException::class)
@@ -63,10 +50,15 @@ class CustomMediaPlayer() : MediaPlayer(), MediaPlayer.OnCompletionListener{
         mState = Status.STOPPED
     }
 
-    @Throws(IllegalStateException::class)
-    override fun pause() {
-        super.pause()
-        mState = Status.PAUSED
+    override fun reset() {
+        super.reset()
+        mState = Status.IDLE
+    }
+
+    @Throws(IOException::class, IllegalStateException::class)
+    override fun prepare() {
+        super.prepare()
+        mState = Status.PREPARED
     }
 
     fun setState(mState: Status) {
@@ -79,5 +71,14 @@ class CustomMediaPlayer() : MediaPlayer(), MediaPlayer.OnCompletionListener{
 
     fun isComplete(): Boolean {
         return mState == Status.COMPLETED
+    }
+
+    override fun setOnCompletionListener(listener: OnCompletionListener) {
+        mListener = listener
+    }
+
+    init {
+        mState = Status.IDLE
+        super.setOnCompletionListener(this)
     }
 }

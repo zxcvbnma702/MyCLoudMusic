@@ -45,9 +45,11 @@ dependencies {
     implementation rootProject.ext.depsLibs["rxjava"]
     implementation rootProject.ext.depsLibs["rxandroid"]
     implementation rootProject.ext.depsLibs["eventbus"]
+    implementation rootProject.ext.depsLibs["swipe"]
+    implementation rootProject.ext.depsLibs["retrofit"]
+    implementation rootProject.ext.depsLibs["gson"]
+    implementation rootProject.ext.depsLibs["gsonConverter"]
 
-    implementation project(path: ':lib_network')
-    implementation project(path: ':lib_common_ui')
     implementation project(path: ':lib_image_loader')
     implementation 'androidx.annotation:annotation:1.3.0'
     implementation 'androidx.lifecycle:lifecycle-livedata-ktx:2.3.1'

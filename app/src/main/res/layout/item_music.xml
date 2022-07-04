@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/item_music"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="10dp">
+
+    <TextView
+        android:id="@+id/item_music_order"
+        android:layout_margin="10dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="@color/color_999999"
+        android:textStyle="bold"
+        android:textSize="19sp"
+        android:layout_centerVertical="true"
+        tools:text = "1"/>
+
+    <TextView
+        android:id="@+id/item_music_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="19sp"
+        android:textColor="@color/danlanzi"
+        android:layout_marginHorizontal="40dp"
+        android:layout_marginTop="5dp"
+        tools:text="暗号"/>
+
+    <TextView
+        android:id="@+id/item_music_author"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="14sp"
+        android:textColor="@color/danlanzi"
+        android:layout_marginHorizontal="40dp"
+        android:layout_marginTop="5dp"
+        android:layout_below="@+id/item_music_title"
+        tools:text="周杰伦~魔杰座"/>
+
+    <TextView
+        android:id="@+id/item_music_length"
+        android:layout_margin="10dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="@color/color_999999"
+        android:textStyle="italic"
+        android:textSize="16sp"
+        android:layout_alignParentEnd="true"
+        android:layout_centerVertical="true"
+        tools:text = "5:34"/>
+
+</RelativeLayout>

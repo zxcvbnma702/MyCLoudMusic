@@ -2,13 +2,11 @@ package com.example.lib_audio.mediaplayer.app
 
 import android.annotation.SuppressLint
 import android.content.Context
-import com.example.lib_audio.mediaplayer.core.AudioController.addAudio
+import com.example.lib_audio.mediaplayer.core.AudioController
 import com.example.lib_audio.mediaplayer.core.AudioController.pause
 import com.example.lib_audio.mediaplayer.core.AudioController.resume
-import com.example.lib_audio.mediaplayer.app.AudioHelper
 import com.example.lib_audio.mediaplayer.model.AudioBean
-import com.example.lib_audio.mediaplayer.core.AudioController
-import java.util.ArrayList
+import com.example.lib_audio.mediaplayer.service.MusicService
 
 /**
  * @author:SunShibo
@@ -23,13 +21,17 @@ object AudioHelper {
 
     fun init(context: Context) {
         AudioHelper.context = context
-        //初始化本地数据库
     }
 
     fun addAudio(list: ArrayList<AudioBean>) {
         AudioController.addAudio(list)
         //        MusicPlayerActivity.start(activity);
     }
+
+    fun startServices() = MusicService.startMusicService()
+
+    fun setIndex(index: Int) = AudioController.setPlayIndex(index)
+
 
     fun pauseAudio() = pause()
     fun resumeAudio() = resume()

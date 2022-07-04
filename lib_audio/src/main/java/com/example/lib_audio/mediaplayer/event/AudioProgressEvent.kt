@@ -7,10 +7,10 @@ import com.example.lib_audio.mediaplayer.core.CustomMediaPlayer
  * @date:2022-06-11 11:37
  * @feature: 播放进度事件
  */
-class AudioProgressEvent(status: CustomMediaPlayer.Status, progress: Int, maxLength: Int) {
+class AudioProgressEvent(status: CustomMediaPlayer.Status, progress: Double, maxLength: Double) {
     var mStatus: CustomMediaPlayer.Status
-    var progress: Int
-    var maxLength: Int
+    var progress: Double
+    var maxLength: Double
 
     init {
         mStatus = status

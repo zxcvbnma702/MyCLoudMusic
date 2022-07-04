@@ -31,7 +31,7 @@ internal class AudioFocusManager(context: Context, listener: AudioFocusListener)
                     .setAudioAttributes(
                         AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_MEDIA)
                             .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC).build())
-                    .setAcceptsDelayedFocusGain(true)
+                    .setAcceptsDelayedFocusGain(false)
                     .build()) == AudioManager.AUDIOFOCUS_REQUEST_GRANTED
         } else {
             audioManager.requestAudioFocus(

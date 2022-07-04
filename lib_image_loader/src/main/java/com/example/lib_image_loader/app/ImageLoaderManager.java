@@ -59,6 +59,12 @@ public class ImageLoaderManager {
                 initNotificationTarget(context, id, rv, notification, NOTIFICATION_ID), url);
     }
 
+    public void displayImageForNotification(Context context, RemoteViews rv, int id,
+                                            Notification notification, int NOTIFICATION_ID, Bitmap bitmap) {
+        this.displayImageForTarget(context,
+                initNotificationTarget(context, id, rv, notification, NOTIFICATION_ID), bitmap);
+    }
+
     /**
      * 不带回调的加载
      */
@@ -129,6 +135,13 @@ public class ImageLoaderManager {
     /**
      * 为非view加载图片
      */
+    private void displayImageForTarget(Context context, Target target, Bitmap bitmap) {
+        this.displayImageForTarget(context, target, bitmap, null);
+    }
+
+    /**
+     * 为非view加载图片
+     */
     private void displayImageForTarget(Context context, Target target, String url,
                                        CustomRequestListener requestListener) {
         Glide.with(context)
@@ -141,21 +154,31 @@ public class ImageLoaderManager {
                 .into(target);
     }
 
+    private void displayImageForTarget(Context context, Target target, Bitmap bitmap,
+                                       CustomRequestListener requestListener) {
+        Glide.with(context)
+                .asBitmap()
+                .load(bitmap)
+                .apply(initCommonRequestOption())
+                .transition(withCrossFade())
+                .fitCenter()
+                .listener(requestListener)
+                .into(target);
+    }
+
     /*
      * 初始化Notification Target
      */
     private NotificationTarget initNotificationTarget(Context context, int id, RemoteViews rv,
                                                       Notification notification, int NOTIFICATION_ID) {
-        NotificationTarget notificationTarget =
-                new NotificationTarget(context, id, rv, notification, NOTIFICATION_ID);
-        return notificationTarget;
+        return new NotificationTarget(context, id, rv, notification, NOTIFICATION_ID);
     }
 
     @SuppressLint("CheckResult")
     private RequestOptions initCommonRequestOption() {
         RequestOptions options = new RequestOptions();
         options.placeholder(R.mipmap.b4y)
-                .error(R.mipmap.b4y)
+                .error(R.mipmap.ic_launcher)
                 .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
                 .skipMemoryCache(false)
                 .priority(Priority.NORMAL);

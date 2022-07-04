@@ -4,6 +4,7 @@ import android.content.Context
 import android.media.AudioAttributes
 import android.media.MediaPlayer
 import android.media.MediaPlayer.SEEK_CLOSEST
+import android.net.Uri
 import android.net.wifi.WifiManager
 import android.os.*
 import android.provider.MediaStore
@@ -40,8 +41,8 @@ internal class AudioPlayer() : MediaPlayer.OnCompletionListener,
                         EventBus.getDefault().post(
                                 AudioProgressEvent(
                                     getStatus(),
-                                    getCurrentPosition(),
-                                    getDuration()
+                                    getCurrentPosition().toDouble(),
+                                    getDuration().toDouble()
                                 )
                             )
                         sendEmptyMessageDelayed(TIME_MSG, TIME_INVAL.toLong())
@@ -58,7 +59,7 @@ internal class AudioPlayer() : MediaPlayer.OnCompletionListener,
         cmp.apply {
             setWakeMode(AudioHelper.context, PowerManager.PARTIAL_WAKE_LOCK)
             setAudioAttributes(attr)
-            setOnCompletionListener(this)
+            setOnCompletionListener(this@AudioPlayer)
             setOnPreparedListener(this@AudioPlayer)
             setOnBufferingUpdateListener(this@AudioPlayer)
             setOnErrorListener(this@AudioPlayer)
@@ -128,11 +129,13 @@ internal class AudioPlayer() : MediaPlayer.OnCompletionListener,
         try {
             cmp.apply {
                 reset()
-                setDataSource(audioBean.url)
+                setDataSource(AudioHelper.context, Uri.parse(audioBean.url))
+//                setDataSource(audioBean.url)
                 prepareAsync()
             }
             EventBus.getDefault().post(AudioLoadEvent(audioBean))
         }catch (e: Exception){
+            Log.e("tag", e.toString())
             EventBus.getDefault().post(AudioErrorEvent(AudioErrorEvent.Error.loadError))
         }
     }

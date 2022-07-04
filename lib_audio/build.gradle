@@ -1,9 +1,6 @@
 plugins {
     id 'com.android.library'
     id 'org.jetbrains.kotlin.android'
-    id("kotlin-android") // Only for Kotlin projects.
-    id("kotlin-kapt") // Only for Kotlin projects.
-    id("io.objectbox") // Apply last.
 }
 
 android {
@@ -40,7 +37,6 @@ dependencies {
     implementation rootProject.ext.depsLibs["eventbus"]
     implementation rootProject.ext.depsLibs["rxjava"]
     implementation project(path: ':lib_image_loader')
-    implementation project(path: ':lib_common_ui')
 
 
     testImplementation 'junit:junit:4.13.2'

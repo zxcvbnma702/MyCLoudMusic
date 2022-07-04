@@ -1,24 +1,24 @@
 package com.example.lib_audio.mediaplayer.model
 
-import io.objectbox.annotation.Entity
-
 /**
  * @author:SunShibo
  * @date:2022-06-11 11:53
  * @feature:
  */
-
 data class AudioBean (
-    val id: String,
-    val url: String,
-    val name: String,
-    val author: String,
-    val album: String,
-    val albumInfo: String,
-    val albumPic: String,
-    val totalTime: String
+    var id: String,
+    var url: String,
+    var name: String,
+    var author: String,
+    //专辑ID
+    var album: String,
+    //专辑名
+    var albumInfo: String,
+    //专辑封面
+    var albumPic: String,
+    var totalTime: String
 ){
-    constructor() : this("999", "1", "error", "error", "error", "error", "error", "error")
+    constructor() : this("999", "1","error", "error", "error", "error", "error", "error")
 
     override fun equals(other: Any?): Boolean {
         if (other == null) {

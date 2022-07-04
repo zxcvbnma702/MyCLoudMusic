@@ -1,15 +1,14 @@
 package com.example.lib_audio.mediaplayer.view
 
 import android.animation.ObjectAnimator
-import android.app.Activity
 import android.content.Context
 import android.util.AttributeSet
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.animation.LinearInterpolator
-import android.widget.ImageView
-import android.widget.RelativeLayout
-import android.widget.TextView
+import android.widget.*
 import com.example.lib_audio.R
+import com.example.lib_audio.mediaplayer.app.AudioHelper
 import com.example.lib_audio.mediaplayer.core.AudioController
 import com.example.lib_audio.mediaplayer.event.AudioLoadEvent
 import com.example.lib_audio.mediaplayer.event.AudioPauseEvent
@@ -17,7 +16,7 @@ import com.example.lib_audio.mediaplayer.event.AudioProgressEvent
 import com.example.lib_audio.mediaplayer.event.AudioStartEvent
 import kotlin.jvm.JvmOverloads
 import com.example.lib_audio.mediaplayer.model.AudioBean
-import com.example.lib_image_loader.app.ImageLoaderManager
+import com.example.lib_audio.mediaplayer.utils.MusicUtil
 import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
 import org.greenrobot.eventbus.ThreadMode
@@ -52,6 +51,9 @@ class BottomMusicView @JvmOverloads constructor(
     private val mRightView by lazy{
         rootView.findViewById<ImageView>(R.id.show_list_view)
     }
+    private val progressView by lazy{
+        rootView.findViewById<ProgressBar>(R.id.progress_bar)
+    }
     private val animator by lazy{
         ObjectAnimator.ofFloat(mLeftView, ROTATION.name, 0f, 360f)
     }
@@ -75,14 +77,17 @@ class BottomMusicView @JvmOverloads constructor(
         animator.start()
 
         mPlayView.setOnClickListener {
-            AudioController.play()
+            AudioController.playOrPause()
         }
 
         //显示音乐列表对话框
         mRightView.setOnClickListener{
 //            val dialog = MusicListDialog(mContext)
 //            dialog.show()
+            Toast.makeText(AudioHelper.context, "还没些", Toast.LENGTH_SHORT).show()
         }
+
+        progressView.progress = 0
     }
 
     override fun onDetachedFromWindow() {
@@ -94,6 +99,7 @@ class BottomMusicView @JvmOverloads constructor(
     fun onAudioLoadEvent(event: AudioLoadEvent) {
         //更新当前view为load状态
         mAudioBean = event.audioBean
+        AudioHelper.startServices()
         showLoadView()
     }
 
@@ -112,13 +118,27 @@ class BottomMusicView @JvmOverloads constructor(
     @Subscribe(threadMode = ThreadMode.MAIN)
     fun onAudioProgressEvent(event: AudioProgressEvent?) {
         //更新当前view的播放进度
+        showProgressView(event?.maxLength, event?.progress)
+    }
+
+    private fun showProgressView(max: Double?, length: Double?) {
+        if (max != null) {
+            progressView.max = 100
+        }
+        val progress = (max?.let { length?.div(it) })?.times(100)
+        if (progress != null) {
+            progressView.progress = progress.toInt()
+        }
+        if (length != null) {
+            Log.i("bottomViewProgress", "length =$progress")
+        }
     }
 
     private fun showLoadView() {
         if (mAudioBean != null) {
-            ImageLoaderManager.getInstance().displayImageForCircle(mLeftView, mAudioBean!!.albumPic)
+            mLeftView!!.setImageBitmap(MusicUtil.getAlbumPicture(AudioHelper.context, mAudioBean!!.url, 1))
             mTitleView!!.text = mAudioBean!!.name
-            mAlbumView!!.text = mAudioBean!!.album
+            mAlbumView!!.text = mAudioBean!!.albumInfo
             mPlayView!!.setImageResource(R.mipmap.note_btn_pause_white)
         }
     }
@@ -127,9 +147,7 @@ class BottomMusicView @JvmOverloads constructor(
         if (mAudioBean != null) {
             mPlayView!!.setImageResource(R.mipmap.note_btn_play_white)
         }
-        if (animator.isRunning){
-            animator.pause()
-        }
+        animator.pause()
     }
 
     private fun showPlayView() {

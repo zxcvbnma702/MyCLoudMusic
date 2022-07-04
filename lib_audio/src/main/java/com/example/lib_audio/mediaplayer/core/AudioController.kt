@@ -1,5 +1,6 @@
 package com.example.lib_audio.mediaplayer.core
 
+import android.util.Log
 import com.example.lib_audio.mediaplayer.event.AudioCompleteEvent
 import com.example.lib_audio.mediaplayer.event.AudioErrorEvent
 import com.example.lib_audio.mediaplayer.event.AudioPlayModeEvent
@@ -151,8 +152,11 @@ object AudioController {
     }
 
     fun playOrPause(){
-        if(CustomMediaPlayer.Status.INITIALIZED == getStatus()){
+        if(getStatus() == CustomMediaPlayer.Status.IDLE){
             play()
+            for(audio in queue){
+                Log.e("tag", audio.name)
+            }
         }
         if(isStartState()){
             pause()
@@ -160,6 +164,8 @@ object AudioController {
             resume()
         }
     }
+
+    fun getNowPlaying(): AudioBean = getCurrentPlaying();
 
     private fun getCurrentPlaying(): AudioBean = getPlaying(indexQueue)
     private fun getStatus(): CustomMediaPlayer.Status = audioPlayer.getStatus()

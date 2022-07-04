@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="10dp">
+
+    <TextView
+        android:id="@+id/item_time_order"
+        android:layout_margin="10dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="@color/color_999999"
+        android:textStyle="bold"
+        android:textSize="19sp"
+        android:layout_centerVertical="true"
+        tools:text = "1"/>
+
+    <TextView
+        android:id="@+id/item_time_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="19sp"
+        android:textColor="@color/danlanzi"
+        android:layout_marginHorizontal="40dp"
+        android:layout_marginTop="5dp"
+        tools:text="暗号"/>
+
+    <TextView
+        android:id="@+id/item_time_author"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="14sp"
+        android:textColor="@color/danlanzi"
+        android:layout_marginHorizontal="40dp"
+        android:layout_marginTop="5dp"
+        android:layout_below="@+id/item_time_title"
+        tools:text="周杰伦~魔杰座"/>
+
+    <TextView
+        android:id="@+id/item_time_length"
+        android:layout_margin="10dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="@color/color_999999"
+        android:textStyle="italic"
+        android:textSize="19sp"
+        android:layout_alignParentEnd="true"
+        android:layout_centerVertical="true"
+        tools:text = "00:05:34"/>
+
+    <View
+        android:id="@+id/divider"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginStart="8dp"
+        android:background="@color/black"
+        android:layout_marginTop="5dp"
+        android:layout_below="@+id/item_time_author"
+        />
+
+</RelativeLayout>
